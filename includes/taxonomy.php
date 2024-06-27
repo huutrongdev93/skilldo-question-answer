@@ -6,16 +6,15 @@ Class QA_Taxonomy {
         add_filter('manage_post_'.QA_KEY.'_columns', array($this, 'columnHeader'), 10);
         add_filter('manage_post_'.QA_KEY.'_custom_column', array($this, 'columnData'), 10, 2);
         add_filter('manage_post_question_columns', array($this, 'columnQuestionHeader'), 10);
-        add_filter('manage_post_question_custom_column', array($this, 'columnQuestionData'), 10, 2);
         add_filter('single_row_post_question', array($this, 'singleQuestionRow'), 10, 2);
         add_action('admin_footer', array($this, 'updateCountQuestion'), 10);
     }
 
-    public function register() {
-
+    public function register(): void
+    {
         $count = 0;
 
-        if(Admin::is()) $count = Posts::count(Qr::set('post_type', 'question')->where('status', 1));
+        if(Admin::is() && !request()->ajax()) $count = Posts::count(Qr::set('post_type', 'question')->where('status', 1));
 
         Taxonomy::addPost(QA_KEY, [
             'labels' => [
@@ -73,16 +72,22 @@ Class QA_Taxonomy {
         }
     }
 
-    public function columnHeader( $columns ) {
-        $columnsNew = array();
+    public function columnHeader( $columns ): array
+    {
+        $columnsNew = [];
+
         foreach ($columns as $key => $value) {
+
             if($key == 'image') continue;
+
             $columnsNew[$key] = $value;
         }
+
         return $columnsNew;
     }
 
-    public function columnData( $column_name, $item ) {
+    public function columnData( $column_name, $item ): void
+    {
         switch ( $column_name ) {
             case 'taxonomy-question-answer-category':
                 $str = '';
@@ -95,37 +100,33 @@ Class QA_Taxonomy {
         }
     }
 
-    public function columnQuestionHeader( $columns ) {
-
-        $columns = [
+    public function columnQuestionHeader( $columns ): array
+    {
+        return [
             'cb'        => 'cb',
-            'name'      => 'Họ tên',
-            'email'     => 'Email',
-            'question'  => 'Câu hỏi',
+            'name'      => [
+                'label' => 'Họ tên',
+                'columns' => fn ($item, $args) => \SkillDo\Table\Columns\ColumnText::make('title', $item, $args)
+            ],
+            'email'      => [
+                'label' => 'Email',
+                'columns' => fn ($item, $args) => \SkillDo\Table\Columns\ColumnText::make('excerpt', $item, $args)
+            ],
+            'question'      => [
+                'label' => 'Câu hỏi',
+                'columns' => fn ($item, $args) => \SkillDo\Table\Columns\ColumnText::make('content', $item, $args)
+            ],
             'action'    => 'Hành động',
         ];
-        return $columns;
     }
 
-    public function columnQuestionData( $column_name, $item ) {
-        switch ( $column_name ) {
-            case 'name':
-                echo $item->title;
-                break;
-            case 'email':
-                echo $item->excerpt;
-                break;
-            case 'question':
-                echo $item->content;
-                break;
-        }
-    }
-
-    public function singleQuestionRow( $columns, $item ) {
+    public function singleQuestionRow( $columns, $item ): string
+    {
         return '<tr class="tr_'.$item->id.' '.(($item->status == 1) ? 'new' : '').'">';
     }
 
-    public function updateCountQuestion() {
+    public function updateCountQuestion(): void
+    {
         if(Template::isPage('post_index') && Admin::getPostType() == 'question') {
             $model = model('post');
             $model->update(['status' => 0], Qr::set('post_type', 'question')->where('status',1));

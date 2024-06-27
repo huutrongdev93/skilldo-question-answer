@@ -15,7 +15,8 @@ Class Question_Answer_Roles
         return $group;
     }
 
-    public function label($label) {
+    public function label($label): array
+    {
         return array_merge($label, static::capabilities());
     }
 

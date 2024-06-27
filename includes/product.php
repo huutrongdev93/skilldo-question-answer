@@ -1,36 +1,70 @@
 <?php
 class QuestionProduct {
-    public static function setting() {
+    public static function setting(): void
+    {
         $productQuestion  = Option::get('product_question', array(
-            'position' => 'sidebar',
+            'position' => 'disabled',
             'data'     => 'handmade',
             'limit'    => 12,
         ));
-        Plugin::partial('question-answer', 'admin/product-setting', ['productQuestion' => $productQuestion]);
+
+        $form = form();
+
+        $form->select2('product_question[position]', [
+            'content' => 'Nội dung sản phẩm',
+            'bottom'  => 'Footer sản phẩm',
+            'disabled' => 'Tắt',
+        ], [
+            'label' => 'Vị trí câu hỏi',
+            'start' => 6
+        ], (!empty($productQuestion['position'])) ? $productQuestion['position'] : 'sidebar' );
+
+        $form->select2('product_question[data]', [
+            'auto' => 'Tự động random',
+            'handmade'  => 'Thủ công chọn từng câu hỏi',
+        ], [
+            'label' => 'Dữ liệu câu hỏi',
+            'start' => 6
+        ], (!empty($productQuestion['data'])) ? $productQuestion['data'] : 'handmade' );
+
+        $form->range('product_question[limit]', [
+            'label' => 'Số câu hỏi hiển thị',
+            'min' => 1,
+            'max' => 30
+        ], (!empty($productQuestion['limit'])) ? $productQuestion['limit'] : '' );
+
+        Admin::view('components/system-default', [
+            'title'           => 'Câu hỏi liên quan',
+            'description'     => 'Cấu hình hiển thị các câu hỏi liên quan sản phẩm',
+            'form'            => $form
+        ]);
     }
+
     public static function product($form, $object) {
-        $productQuestion  = Option::get('product_question', array(
-            'position' => 'sidebar',
-            'data'     => 'handmade',
-            'limit'    => 12,
-        ));
-        if(!empty($productQuestion['data']) && $productQuestion['data'] == 'handmade') {
-            $question =  (have_posts($object)) ? Product::getMeta($object->id, 'product_question', true) : [];
-            $form->add('product_question', 'popover-advance', [
-                'label' => 'Câu hỏi liên quan',
-                'search' => 'post',
-                'taxonomy' => QA_KEY,
-            ], $question);
-        }
+
+        $question = (have_posts($object)) ? Product::getMeta($object->id, 'product_question', true) : [];
+
+        $form->popoverAdvance('product_question', [
+            'label'     => 'Câu hỏi liên quan',
+            'search'    => 'post',
+            'taxonomy'  => QA_KEY,
+            'noImage'   => true,
+        ], $question);
+
         return $form;
     }
-    static public function productSave($product_id, $module) {
+    static public function productSave($product_id, $module): void
+    {
         if($module == 'products') {
-            $question = Request::Post('product_question', ['type' => 'int']);
+
+            $question = request()->input('product_question');
+
             if(is_string($question)) $question = [];
+
             Product::updateMeta($product_id, 'product_question', $question);
         }
     }
+
     public static function html($object) {
 
         if(Template::getData('object') === false) return;
@@ -60,14 +94,15 @@ class QuestionProduct {
         $questions = Posts::gets($questionsQr);
 
         if(have_posts($questions)) {
+
             $args['questions']  = $questions;
+
             $args['heading']    = __('Câu Hỏi Liên Quan', 'product_heading_question');
+
             $args['id']         = 'question';
-            if($args['position'] == 'sidebar') {
-                Plugin::partial(QA_NAME, 'question-sidebar', $args);
-            }
+
             if($args['position'] == 'content' || $args['position'] == 'bottom') {
-                Plugin::partial(QA_NAME, 'question-content', $args);
+                Plugin::view(QA_NAME, 'question-content', $args);
             }
         }
     }

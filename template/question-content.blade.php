@@ -1,13 +1,17 @@
-<div class="box products-<?php echo (!empty($id)) ? $id : '';?>">
-    <div class="header-title"><h3 class="header"><?php echo $heading;?></h3></div>
+<div class="box products-{{(!empty($id)) ? $id : ''}}">
+    <div class="header-title"><h3 class="header">{{$heading}}</h3></div>
     <div class="box-content" style="overflow: inherit">
         <section class="question-section">
-            <?php foreach ($questions as $key => $question) { ?>
+            @foreach ($questions as $key => $question)
                 <div class="question-wrap">
-                    <a data-bs-toggle="collapse" href="#collapse_<?php echo $question->id;?>" role="button" aria-expanded="false" aria-controls="collapse_<?php echo $question->id;?>"><?php echo $question->title;?></a>
-                    <div class="collapse" id="collapse_<?php echo $question->id;?>"><?php echo $question->content;?></div>
+                    <a data-bs-toggle="collapse" href="#collapse_{{ $question->id }}" role="button" aria-expanded="false" aria-controls="collapse_{{ $question->id }}">
+                        {!! $question->title !!}
+                    </a>
+                    <div class="collapse" id="collapse_{{ $question->id }}">
+                        {!! $question->content !!}
+                    </div>
                 </div><!-- end of Catagory -->
-            <?php } ?>
+            @endforeach
         </section><!-- End of Questions -->
     </div>
 </div>

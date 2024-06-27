@@ -1,14 +1,15 @@
 <?php
 class QA_Activator {
 
-    public static function activate() {
+    public static function activate(): void
+    {
         self::addRole();
         self::randomData();
         self::templateFile();
     }
 
-    public static function randomData() {
-
+    public static function randomData(): void
+    {
         $questions = [
             [
                 'title'     => 'What are some random questions to ask?',
@@ -41,56 +42,70 @@ class QA_Activator {
             Posts::insert($question);
         }
 
-        Pages::insert(['title' => 'FAQ']);
+        $count = Pages::where('slug', 'faq')->amount();
+
+        if($count == 0) {
+            Pages::insert(['title' => 'FAQ']);
+        }
 
         $product_question = Option::get('product_question');
 
         if(empty($product_question)) {
             Option::update('product_question', array(
-                'position' => 'sidebar',
+                'position' => 'disabled',
                 'data'     => 'handmade',
                 'limit'    => 12,
             ));
         }
     }
 
-    public static function templateFile() {
-        $template  = [
-            'page-faq.php'                    => QA_NAME.'/template/page-faq.php',
-            'template-page-faq.php'           => QA_NAME.'/template/template-page-faq.php',
+    public static function templateFile(): void
+    {
+        $store = Storage::disk('views');
+
+        $templateLayout  = [
+            'template-page-faq.blade.php'  => 'plugins/'.QA_NAME.'/template/template-page-faq.blade.php',
         ];
-        foreach ($template as $file_name => $file_path) {
-            $file_new  = Path::theme($file_name, true);
-            $file_path = Path::plugin($file_path, true);
-            if(file_exists($file_new)) continue;
-            if(file_exists($file_path)) {
-                $handle     = file_get_contents($file_path);
-                $file_new   = fopen($file_new, "w");
-                fwrite($file_new, $handle);
-                fclose($file_new);
+
+        foreach ($templateLayout as $file_name => $file_path) {
+            if($store->has(Theme::name().'/theme-child/layouts/'.$file_name)) {
+                continue;
             }
+            $store->copy($file_path, Theme::name().'/theme-child/layouts/'.$file_name);
+        }
+
+        $templateViews  = [
+            'page-faq.blade.php' => 'plugins/'.QA_NAME.'/template/page-faq.blade.php',
+        ];
+
+        foreach ($templateViews as $file_name => $file_path) {
+            if($store->has(Theme::name().'/theme-child/'.$file_name)) {
+                continue;
+            }
+            $store->copy($file_path, Theme::name().'/theme-child/'.$file_name);
         }
     }
 
-    public static function addRole() {
+    public static function addRole(): void
+    {
         // Add caps for Root role
         $role = Role::get('root');
-        $role->add_cap('view_question_answer');
-        $role->add_cap('add_question_answer');
-        $role->add_cap('edit_question_answer');
-        $role->add_cap('delete_question_answer');
+        $role->add('view_question_answer');
+        $role->add('add_question_answer');
+        $role->add('edit_question_answer');
+        $role->add('delete_question_answer');
 
-        $role->add_cap('view_question');
-        $role->add_cap('delete_question');
+        $role->add('view_question');
+        $role->add('delete_question');
 
         // Add caps for Administrator role
         $role = Role::get('administrator');
-        $role->add_cap('view_question_answer');
-        $role->add_cap('add_question_answer');
-        $role->add_cap('edit_question_answer');
-        $role->add_cap('delete_question_answer');
+        $role->add('view_question_answer');
+        $role->add('add_question_answer');
+        $role->add('edit_question_answer');
+        $role->add('delete_question_answer');
 
-        $role->add_cap('view_question');
-        $role->add_cap('delete_question');
+        $role->add('view_question');
+        $role->add('delete_question');
     }
 }
