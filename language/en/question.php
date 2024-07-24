@@ -7,4 +7,6 @@ return [
     'form.field.content' => 'Question',
     'form.field.content.placeholder' => 'Your Question',
     'form.button.send' => 'Send Question',
+    'form.error.length' => 'Your question is too short',
+    'form.success' => 'Thank you for sending us your question',
 ];

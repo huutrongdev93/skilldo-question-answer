@@ -7,4 +7,6 @@ return [
     'form.field.content' => 'Câu hỏi',
     'form.field.content.placeholder' => 'Câu hỏi của bạn',
     'form.button.send' => 'Gửi câu hỏi',
+    'form.error.length' => 'Câu hỏi của bạn quá ngắn',
+    'form.success' => 'Cám ơn bạn đã gửi câu hỏi cho chúng tôi',
 ];

@@ -1,13 +1,4 @@
 <?php
-/**
-Plugin name     : Question Answer
-Plugin class    : question_answer
-Plugin uri      : http://sikido.vn
-Description     : Built Question Answer site for your website
-Author          : SKDSoftware Dev Team
-Version         : 2.0.0
- */
-
 use JetBrains\PhpStorm\NoReturn;
 
 const QA_NAME = 'question-answer';
@@ -76,7 +67,7 @@ if (!function_exists('ajax_question_save')) {
             $question = trim($request->input('question'));
 
             if(Str::length($question) <= 20) {
-                response()->error(trans('Câu hỏi của bạn quá ngắn.'));
+                response()->error(trans('question.form.error.length'));
             }
 
             $data = [
@@ -92,7 +83,9 @@ if (!function_exists('ajax_question_save')) {
 
             if(!is_skd_error($res)) {
 
-                response()->success('Cám ơn bạn đã gửi câu hỏi cho chúng tôi.');
+                CacheHandler::delete('question_count_new');
+
+                response()->success('question.form.success');
             }
         }
 
