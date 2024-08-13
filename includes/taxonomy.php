@@ -12,13 +12,13 @@ Class QA_Taxonomy {
 
     public function register(): void
     {
-        $count = CacheHandler::get('question_count_new');
+        $count = \SkillDo\Cache::get('question_count_new');
 
         if(Admin::is() && !request()->ajax() && is_null($count)) {
 
             $count = Posts::count(Qr::set('post_type', 'question')->where('status', 1));
 
-            CacheHandler::save('question_count_new', $count);
+            \SkillDo\Cache::save('question_count_new', $count);
         }
 
         Taxonomy::addPost(QA_KEY, [

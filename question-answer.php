@@ -83,7 +83,7 @@ if (!function_exists('ajax_question_save')) {
 
             if(!is_skd_error($res)) {
 
-                CacheHandler::delete('question_count_new');
+                \SkillDo\Cache::delete('question_count_new');
 
                 response()->success('question.form.success');
             }
