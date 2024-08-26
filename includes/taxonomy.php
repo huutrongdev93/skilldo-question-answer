@@ -4,7 +4,6 @@ Class QA_Taxonomy {
     function __construct() {
         $this->register();
         add_filter('manage_post_'.QA_KEY.'_columns', array($this, 'columnHeader'), 10);
-        add_filter('manage_post_'.QA_KEY.'_custom_column', array($this, 'columnData'), 10, 2);
         add_filter('manage_post_question_columns', array($this, 'columnQuestionHeader'), 10);
         add_filter('single_row_post_question', array($this, 'singleQuestionRow'), 10, 2);
         add_action('admin_footer', array($this, 'updateCountQuestion'), 10);
@@ -91,20 +90,6 @@ Class QA_Taxonomy {
         return $columnsNew;
     }
 
-    public function columnData( $column_name, $item ): void
-    {
-        switch ( $column_name ) {
-            case 'taxonomy-question-answer-category':
-                $str = '';
-                $categories = PostCategory::getsByPost($item->id, Qr::set('value', 'question-answer-category')->select('categories.id', 'categories.name', 'categories.slug'));
-                foreach ($categories as $value) {
-                    $str .= sprintf('<a href="%s">%s</a>, ', URL_ADMIN.'/post/post_categories/edit/'.$value->id.'?cate_type='.Admin::getCateType(), $value->name);
-                }
-                echo trim($str,', ');
-            break;
-        }
-    }
-
     public function columnQuestionHeader( $columns ): array
     {
         return [
@@ -134,7 +119,7 @@ Class QA_Taxonomy {
     {
         if(Template::isPage('post_index') && Admin::getPostType() == 'question') {
             $model = model('post');
-            $model->update(['status' => 0], Qr::set('post_type', 'question')->where('status',1));
+            $model::where('post_type', 'question')->where('status',1)->update(['status' => 0]);
         }
     }
 }
