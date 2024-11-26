@@ -1,4 +1,7 @@
 <?php
+
+use SkillDo\DB;
+
 Class QA_Taxonomy {
 
     function __construct() {
@@ -118,8 +121,10 @@ Class QA_Taxonomy {
     public function updateCountQuestion(): void
     {
         if(Template::isPage('post_index') && Admin::getPostType() == 'question') {
-            $model = model('post');
-            $model::where('post_type', 'question')->where('status',1)->update(['status' => 0]);
+            DB::table('post')
+                ->where('post_type', 'question')
+                ->where('status',1)
+                ->update(['status' => 0]);
         }
     }
 }
